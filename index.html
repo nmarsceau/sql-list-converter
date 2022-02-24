@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SQL List Converter</title>
+    <link rel="icon" href="data:image/svg+xml;utf8,<svg height='21' viewBox='0 0 21 21' width='21' xmlns='http://www.w3.org/2000/svg'><g fill='none' fill-rule='evenodd' transform='translate(4 5)'><g stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'><path d='m11.5 5.5h-7'/><path d='m11.5 9.5h-7'/><path d='m11.5 1.5h-7'/></g><path d='m1.49884033 2.5c.5 0 1-.5 1-1s-.5-1-1-1-.99884033.5-.99884033 1 .49884033 1 .99884033 1zm0 4c.5 0 1-.5 1-1s-.5-1-1-1-.99884033.5-.99884033 1 .49884033 1 .99884033 1zm0 4c.5 0 1-.5 1-1s-.5-1-1-1-.99884033.5-.99884033 1 .49884033 1 .99884033 1z' fill='currentColor'/></g></svg>">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+        }
+
+        #pageContainer {
+            box-sizing: border-box;
+            display: grid;
+            height: 100vh;
+            width: 100%;
+            max-width: 1200px;
+            margin-inline: auto;
+            grid-template-rows: min-content min-content 1fr 1fr min-content;
+            grid-template-areas:
+                "description"
+                "options"
+                "input"
+                "output"
+                "actions"
+            ;
+            gap: 0.75rem;
+            padding: 0.75rem;
+        }
+
+        #toolDescription {
+            grid-area: description;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            line-height: 1;
+            margin-block: 0 0.75rem;
+            text-align: center;
+        }
+
+        p {
+            margin-block: 0;
+            text-align: center;
+        }
+
+        noscript p {
+            background-color: #efeea1;
+            padding: 0.5rem 0.75rem;
+            margin-block-end: 0.75rem;
+        }
+
+        #optionsContainer {
+            grid-area: options;
+            text-align: center;
+        }
+
+        #inputContainer, #outputContainer {
+            display: grid;
+            gap: 0.25rem;
+            grid-template-rows: min-content 1fr;
+        }
+
+        #inputContainer {
+            grid-area: input;
+        }
+
+        #outputContainer {
+            grid-area: output;
+        }
+
+        #input {
+            font-size: 1.3rem;
+            resize: none;
+            border: 1px solid black;
+            padding: 0.75rem;
+        }
+
+        #output {
+            font-size: 1.3rem;
+            font-family: monospace;
+            line-height: 1;
+            overflow: auto;
+            border: 1px solid black;
+            padding: 0.75rem;
+            overflow-wrap: break-word;
+        }
+
+        #actionsContainer {
+            text-align: center;
+            grid-area: actions;
+        }
+
+        button {
+            font-size: 1.3rem;
+            padding: 0.5rem 2rem;
+            border: unset;
+        }
+
+        button.blue {
+            background-color: #006494;
+            color: #ffffff;
+        }
+
+        button.blue:hover,
+        button.blue:focus,
+        button.blue:active {
+            background-color: #13293d;
+        }
+
+        button.red {
+            background-color: #b10000;
+            color: #ffffff;
+        }
+
+        button.red:hover,
+        button.red:focus,
+        button.red:active {
+            background-color: #630000;
+        }
+
+        button[disabled] {
+            background-color: #777;
+            color: #eee;
+        }
+
+        button[disabled]:hover,
+        button[disabled]:focus,
+        button[disabled]:active {
+            background-color: #777;
+            color: #eee;
+        }
+
+        @media screen and (min-aspect-ratio: 3/2) {
+            #pageContainer {
+                max-width: 1500px;
+                grid-template-rows: min-content min-content 1fr;
+                grid-template-columns: repeat(6, 1fr);
+                grid-template-areas:
+                    "description description description description description actions"
+                    "options options options options options actions"
+                    "input input input output output output"
+                ;
+            }
+
+            #toolDescription, h1, p, #optionsContainer {
+                text-align: left;
+            }
+
+            #actionsContainer {
+                align-self: end;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            button + button {
+                margin-top: 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="pageContainer">
+        <div id="toolDescription">
+            <h1>SQL List Converter</h1>
+            <noscript><p>This tool requires JavaScript to work correctly.</p></noscript>
+            <p>This tool accepts a list of values separated by any whitespace and converts them into a SQL list.</p>
+        </div>
+        <div id="optionsContainer">
+            <input type="checkbox" id="commaBehavior" name="commaBehavior" disabled>
+            <label for="commaBehavior">Also treat commas as a separator</label><br>
+            <input type="checkbox" id="autoCopyBehavior" name="autoCopyBehavior" disabled>
+            <label for="autoCopyBehavior">Automatically copy output to clipboard</label>
+        </div>
+        <div id="inputContainer">
+            <label for="input"><strong>Input</strong></label>
+            <textarea id="input" disabled></textarea>
+        </div>
+        <div id="outputContainer">
+            <label for="output"><strong>Output</strong></label>
+            <output id="output" for="input"></output>
+        </div>
+        <div id="actionsContainer">
+            <button id="copy" class="blue" disabled>Copy</button>
+            <button id="clear" class="red" disabled>Clear</button>
+        </div>
+    </div>
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        const commaBehaviorOption = document.getElementById('commaBehavior');
+        const autoCopyOption = document.getElementById('autoCopyBehavior');
+        const copyButton = document.getElementById('copy');
+        const clearButton = document.getElementById('clear');
+
+        // Initialize Options
+        const options = {
+            treatCommasAsSeparator: {
+                defaultValue: 'true',
+                type: 'checkbox',
+                element: commaBehaviorOption
+            },
+            autoCopy: {
+                defaultValue: 'true',
+                type: 'checkbox',
+                element: autoCopyOption
+            }
+        };
+        for (const [optionName, optionDetails] of Object.entries(options)) {
+            if (localStorage.getItem(optionName) === null) {
+                localStorage.setItem(optionName, optionDetails.defaultValue);
+            }
+            switch (optionDetails.type) {
+                case 'checkbox':
+                    if (localStorage.getItem(optionName) === 'true') {
+                        optionDetails.element.checked = true;
+                    }
+                    optionDetails.element.addEventListener('change', () => {
+                        localStorage.setItem(optionName, optionDetails.element.checked ? 'true' : 'false');
+                    });
+                    break;
+            }
+        }
+
+        //Initialize Interactivity
+        function copyOutput() {
+            navigator.clipboard.writeText(output.innerText);
+        }
+
+        function convertList() {
+            output.innerText = input.value
+                .split(localStorage.getItem('treatCommasAsSeparator') === 'true' ? /[,\s]/ : /\s/)
+                .filter(value => value !== '')
+                .map(value => `'${value}'`)
+                .join(',');
+            if (localStorage.getItem('autoCopy') === 'true') {copyOutput();}
+        }
+
+        let delayConversionTimeout;
+        input.addEventListener('input', () => {
+            clearTimeout(delayConversionTimeout);
+            delayConversionTimeout = setTimeout(convertList, 400);
+        });
+        commaBehaviorOption.addEventListener('change', convertList);
+        copyButton.addEventListener('click', copyOutput);
+        clearButton.addEventListener('click', () => {
+            input.value = '';
+            output.innerText = '';
+            input.focus();
+        });
+
+        commaBehaviorOption.disabled = false;
+        autoCopyOption.disabled = false;
+        copyButton.disabled = false;
+        clearButton.disabled = false;
+        input.disabled = false;
+
+        input.focus();
+    </script>
+</body>
+</html>
