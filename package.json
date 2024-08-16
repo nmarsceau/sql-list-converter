@@ -1,0 +1,15 @@
+{
+	"name": "sql-list-converter",
+	"version": "1.0.0",
+	"description": "This is an online tool that accepts a list of values separated by any whitespace and converts them into a SQL list.",
+	"main": "index.html",
+	"scripts": {
+	  "dev": "ws",
+	  "test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "Nicolas Marsceau",
+	"license": "Apache-2.0",
+  	"devDependencies": {
+    	"local-web-server": "^5.4.0"
+  	}
+}
