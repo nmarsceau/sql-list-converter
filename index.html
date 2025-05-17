@@ -236,6 +236,7 @@
             output.innerText = input.value
                 .split(localStorage.getItem('treatCommasAsSeparator') === 'true' ? /[,\s]/ : /\s/)
                 .filter(value => value !== '')
+                .map(value => value.replaceAll("'", "''"))
                 .map(value => `'${value}'`)
                 .join(',');
             if (localStorage.getItem('autoCopy') === 'true') {copyOutput();}
