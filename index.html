@@ -175,7 +175,9 @@
             <input type="checkbox" id="commaBehavior" name="commaBehavior" disabled>
             <label for="commaBehavior">Also treat commas as a separator</label><br>
             <input type="checkbox" id="autoCopyBehavior" name="autoCopyBehavior" disabled>
-            <label for="autoCopyBehavior">Automatically copy output to clipboard</label>
+            <label for="autoCopyBehavior">Automatically copy output to clipboard</label><br>
+			<input type="checkbox" id="removeDuplicates" name="removeDuplicates" disabled>
+			<label for="removeDuplicates">Remove duplicates</label>
         </div>
         <div id="inputContainer">
             <label for="input"><strong>Input</strong></label>
@@ -195,6 +197,7 @@
         const output = document.getElementById('output');
         const commaBehaviorOption = document.getElementById('commaBehavior');
         const autoCopyOption = document.getElementById('autoCopyBehavior');
+		const removeDuplicatesOption = document.getElementById('removeDuplicates');
         const copyButton = document.getElementById('copy');
         const clearButton = document.getElementById('clear');
 
@@ -209,7 +212,12 @@
                 defaultValue: 'true',
                 type: 'checkbox',
                 element: autoCopyOption
-            }
+            },
+			removeDuplicates: {
+				defaultValue: 'true',
+				type: 'checkbox',
+				element: removeDuplicatesOption
+			}
         };
         for (const [optionName, optionDetails] of Object.entries(options)) {
             if (localStorage.getItem(optionName) === null) {
@@ -233,13 +241,17 @@
         }
 
         function convertList() {
-            output.innerText = input.value
-                .split(localStorage.getItem('treatCommasAsSeparator') === 'true' ? /[,\s]/ : /\s/)
-                .filter(value => value !== '')
-                .map(value => value.replaceAll("'", "''"))
-                .map(value => `'${value}'`)
-                .join(',');
-            if (localStorage.getItem('autoCopy') === 'true') {copyOutput();}
+            let values = input.value
+                .split(localStorage.getItem('treatCommasAsSeparator') === 'true' ? /[,\s]/ : /\s/) // Split input into elements
+                .filter(value => value !== '') // Remove empty elements
+			if (localStorage.getItem('removeDuplicates') === 'true') {
+            	values = [...new Set(values)]; // Remove duplicates
+			}
+			output.innerText = values
+				.map(value => value.replaceAll("'", "''")) // Escape single quotes
+                .map(value => `'${value}'`) // Wrap elements in single quotes
+                .join(','); // Put elements back together, separated by commas
+            if (localStorage.getItem('autoCopy') === 'true') {copyOutput();} // Copy output to clipboard if autoCopy is enabled
         }
 
         let delayConversionTimeout;
@@ -248,6 +260,7 @@
             delayConversionTimeout = setTimeout(convertList, 400);
         });
         commaBehaviorOption.addEventListener('change', convertList);
+		removeDuplicatesOption.addEventListener('change', convertList);
         copyButton.addEventListener('click', copyOutput);
         clearButton.addEventListener('click', () => {
             input.value = '';
@@ -257,6 +270,7 @@
 
         commaBehaviorOption.disabled = false;
         autoCopyOption.disabled = false;
+		removeDuplicatesOption.disabled = false;
         copyButton.disabled = false;
         clearButton.disabled = false;
         input.disabled = false;
