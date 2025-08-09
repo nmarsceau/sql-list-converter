@@ -135,6 +135,53 @@
 			color: #eee;
 		}
 
+		@media screen and (min-width: 500px) {
+			#pageContainer {
+				grid-template-rows: min-content min-content 1fr 1fr;
+				grid-template-columns: 1fr 120px;
+				grid-template-areas:
+					"description description"
+					"options actions"
+					"input input"
+					"output output"
+				;
+			}
+
+			#optionsContainer {
+				text-align: left;
+			}
+
+			button {
+				width: 100%;
+				font-size: 1.1rem;
+			}
+
+			button + button {
+				margin-top: 0.25rem;
+			}
+		}
+
+		@media screen and (min-width: 600px) {
+			#pageContainer {
+				grid-template-columns: 5fr 4fr;
+			}
+
+			#actionsContainer {
+				justify-self: end;
+			}
+
+			button {
+				width: 120px;
+				font-size: 1.2rem;
+			}
+		}
+
+		@media screen and (min-width: 700px) {
+			button {
+				font-size: 1.3rem;
+			}
+		}
+
 		@media screen and (min-aspect-ratio: 3/2) {
 			#pageContainer {
 				max-width: 1500px;
