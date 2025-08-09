@@ -324,6 +324,11 @@
 		input.disabled = false;
 
 		input.focus();
+
+		window.addEventListener('focus', () => {
+			input.focus();
+			input.select();
+		});
 	</script>
 </body>
 </html>
